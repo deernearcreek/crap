@@ -1,0 +1,24 @@
+#!/bin/bash
+# Make sure to change all the directories to your working folder
+# chmod +x ./SymmetricNormalization
+duration=0
+# for i in 2 3 4 5 11 202 205 208 212 216 217 222
+ for i in 2 4 5 208 212 222
+ do
+
+ 	fixed="C:/Users/rhan5/Documents/GitHub/JSR/tests/HS${i}_cbct.nii.gz"  # directory to CBCT images
+ 	moving="C:/Users/rhan5/Documents/GitHub/JSR/tests/HS${i}_mr.nii.gz"  # directory to MR images
+ 	moving_mr="C:/Users/rhan5/Documents/GitHub/JSR/tests/HS${i}_mr.nii.gz"
+ 	registered="C:/Users/rhan5/Documents/GitHub/JSR/tests/HS${i}_SyN_MI_mr_registered.nii.gz"  # directory to save
+ 	out="C:/Users/rhan5/Documents/GitHub/JSR/tests//HS${i}"
+ 	ventricle_moving="C:/Users/rhan5/Documents/GitHub/JSR/tests/${i}_segmentation_moving.nii.gz"  # directory to moving segmentation
+ 	ventricle_registered="C:/Users/rhan5/Documents/GitHub/JSR/tests/HS${i}_SyN_MI_segmentation_registered.nii.gz"  # directory to fixed segmentation
+
+ 	start=$SECONDS
+ 	E:/c_users/Registration/ANTs_2.1.0_Windows/Release/antsRegistration -d 3 -o [${out},field.nii.gz,inverse_field.nii.gz] --interpolation Linear --transform SyN[0.5,2.0,0.0] --metric MI[${fixed},${moving},1,32] --convergence [100x50,1e-7] --shrink-factors 2x1 --smoothing-sigmas 2x1vox
+  E:/c_users/Registration/ANTs_2.1.0_Windows/Release/antsApplyTransforms -d 3 -e 0 -i ${moving_mr} -r ${fixed} -o ${registered} -n Linear -t "${out}Warp.nii.gz"
+ 	duration=$(( SECONDS - start + duration))
+ 	E:/c_users/Registration/ANTs_2.1.0_Windows/Release/antsApplyTransforms -d 3 -e 0 -i ${ventricle_moving} -r ${fixed} -o ${ventricle_registered} -n NearestNeighbor -t "${out}Warp.nii.gz"
+
+done
+echo "$duration seconds"
